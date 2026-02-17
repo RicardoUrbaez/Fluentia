@@ -1,0 +1,16 @@
+{
+  "name": "fluentia-mvp",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "install:all": "npm --prefix server install && npm --prefix client install",
+    "dev": "concurrently -n SERVER,CLIENT -c cyan,magenta \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "build": "npm --prefix server run build && npm --prefix client run build",
+    "start": "concurrently -n SERVER,CLIENT -c cyan,magenta \"npm --prefix server run start\" \"npm --prefix client run preview\"",
+    "db:setup": "npm --prefix server run prisma:generate && npm --prefix server run prisma:migrate -- --name init && npm --prefix server run prisma:seed",
+    "test:chat": "npm --prefix server run test:chat"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

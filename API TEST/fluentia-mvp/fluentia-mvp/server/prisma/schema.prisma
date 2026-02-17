@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  language  String    @default("Spanish")
+  createdAt DateTime  @default(now())
+  sessions  Session[]
+  mistakes  Mistake[]
+}
+
+model Topic {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  language  String    @default("Spanish")
+  lessons   Lesson[]
+  sessions  Session[]
+  mistakes  Mistake[]
+}
+
+model Lesson {
+  id            Int              @id @default(autoincrement())
+  topicId       Int
+  title         String
+  skillFocus    String
+  readingPassage String
+  listeningText String
+  topic         Topic            @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  vocabItems    LessonVocabItem[]
+  questions     LessonQuestion[]
+  sessions      Session[]
+}
+
+model LessonVocabItem {
+  id        Int    @id @default(autoincrement())
+  lessonId  Int
+  word      String
+  english   String
+  imageUrl  String
+  lesson    Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
+model LessonQuestion {
+  id            Int    @id @default(autoincrement())
+  lessonId      Int
+  question      String
+  optionA       String
+  optionB       String
+  optionC       String
+  correctOption String
+  lesson        Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id        Int         @id @default(autoincrement())
+  userId    Int
+  topicId   Int
+  lessonId  Int
+  createdAt DateTime    @default(now())
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic     Topic       @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  lesson    Lesson      @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  evaluations Evaluation[]
+}
+
+model Message {
+  id          Int          @id @default(autoincrement())
+  sessionId   Int
+  role        String
+  content     String
+  createdAt   DateTime     @default(now())
+  session     Session      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  evaluation  Evaluation?
+}
+
+model Evaluation {
+  id             Int      @id @default(autoincrement())
+  sessionId      Int
+  messageId      Int      @unique
+  grammar        Int
+  vocabulary     Int
+  fluency        Int
+  taskCompletion Int
+  cefr           String
+  evidenceJson   String
+  nextExercise   String
+  wordBankJson   String
+  feedbackJson   String
+  createdAt      DateTime @default(now())
+  session        Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  message        Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}
+
+model Mistake {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  topicId    Int
+  word       String
+  correction String
+  quote      String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic      Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+}
